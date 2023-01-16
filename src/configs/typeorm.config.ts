@@ -9,4 +9,5 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   password: '1234',
   database: 'todos',
   entities: [__dirname + '../../**/*.entity.{js,ts}'],
+  synchronize: false,
 };
