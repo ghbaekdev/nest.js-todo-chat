@@ -4,6 +4,8 @@ import { CreateBoardDto } from './dto/create-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
 import { Board } from './board.entity';
+import { User } from 'src/auth/user.entity';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class BoardsService {
@@ -12,9 +14,44 @@ export class BoardsService {
     private boardRepository: BoardRepository,
   ) {}
 
-  async getAllBoard(): Promise<Board[]> {
-    return this.boardRepository.find();
+  async getAllBoard(user: User, date: any): Promise<Board[]> {
+    //query는 board에 접근
+    // const query = this.boardRepository.createQueryBuilder('board');
+    // query.where('board.userId= :userId', { userId: user.id });
+    // const boards = await query.getMany();
+    // return boards;
+
+    const data = await this.boardRepository.find({
+      select: {
+        user: {
+          id: true,
+          username: true,
+          boards: false,
+        },
+      },
+      relations: {
+        user: true,
+      },
+      where: {
+        createdAt:
+          date['start-date'] && date['end-date']
+            ? Between(new Date(date['start-date']), new Date(date['end-date']))
+            : null,
+        user: { id: user.id },
+      },
+    });
+
+    return data;
   }
+
+  // async getDate() {
+  //   const result = await this.boardRepository.find({
+  //     where: {
+  //       createdAt: Between(new Date('2023-01-17 07:05:00'), new Date()),
+  //     },
+  //   });
+  //   return result;
+  // }
 
   async getBoardById(id: number): Promise<Board> {
     const found = await this.boardRepository.findOneBy({ id });
@@ -39,16 +76,11 @@ export class BoardsService {
   //   return await this.boardRepository
   // }
 
-  async createBoard(createBoardDto: CreateBoardDto) {
-    const { title, description } = createBoardDto;
-
-    const board = this.boardRepository.create({
-      title,
-      description,
-      status: BoardStatus.PUBLIC,
-    });
-    await this.boardRepository.save(board);
-    return board;
+  async createBoard(
+    createBoardDto: CreateBoardDto,
+    user: User,
+  ): Promise<Board> {
+    return this.boardRepository.createBoard(createBoardDto, user);
   }
 
   // createBoard(createBoardDto: CreateBoardDto) {
@@ -63,14 +95,12 @@ export class BoardsService {
   //   return board;
   // }
 
-  async deleteBoard(id: number): Promise<void> {
-    const result = await this.boardRepository.delete(id);
+  async deleteBoard(id: number, user: User): Promise<void> {
+    const result = await this.boardRepository.delete({ id, user });
 
     if (result.affected === 0) {
-      throw new NotFoundException(`${id} 이 아이디를 찾을 수 없음.`);
+      throw new NotFoundException(`이 아이디는 찾을수 없음.${id}`);
     }
-
-    console.log(result);
   }
   // deleteBoard(id: string): void {
   //   const found = this.getBoardById(id);

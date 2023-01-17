@@ -2,9 +2,7 @@ import { GetUser } from './get-user.dacorator';
 import {
   Body,
   Controller,
-  Param,
   Post,
-  Req,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
