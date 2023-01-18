@@ -14,14 +14,14 @@ export class BoardsService {
     private boardRepository: BoardRepository,
   ) {}
 
-  async getAllBoard(user: User, date: any): Promise<Board[]> {
+  async getAllBoard(user: User, data: any): Promise<Board[]> {
     //query는 board에 접근
     // const query = this.boardRepository.createQueryBuilder('board');
     // query.where('board.userId= :userId', { userId: user.id });
     // const boards = await query.getMany();
     // return boards;
 
-    const data = await this.boardRepository.find({
+    const result = await this.boardRepository.find({
       select: {
         user: {
           id: true,
@@ -34,14 +34,16 @@ export class BoardsService {
       },
       where: {
         createdAt:
-          date['start-date'] && date['end-date']
-            ? Between(new Date(date['start-date']), new Date(date['end-date']))
+          data['start-date'] && data['end-date']
+            ? Between(new Date(data['start-date']), new Date(data['end-date']))
             : null,
         user: { id: user.id },
       },
+      skip: data['page'] ? (data['page'] - 1) * 2 : 0,
+      take: 2,
     });
 
-    return data;
+    return result;
   }
 
   // async getDate() {
@@ -108,9 +110,14 @@ export class BoardsService {
   // }
   async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
     const board = await this.getBoardById(id);
-
     board.status = status;
     await this.boardRepository.save(board);
+    return board;
+  }
+
+  async updateBoardComplete(id: number, completed: boolean): Promise<Board> {
+    const board = await this.getBoardById(id);
+    board.completed = completed;
     return board;
   }
   // updateBoardStatus(id: string, status: BoardStatus): Board {

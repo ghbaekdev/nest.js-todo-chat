@@ -26,6 +26,9 @@ export class Board extends BaseEntity {
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: any;
 
+  @Column({ default: false })
+  completed: boolean;
+
   //보드가져올때 유저 가져올필요 없으니 eager false
   @ManyToOne((type) => User, (user) => user.boards, { eager: false })
   user: User;

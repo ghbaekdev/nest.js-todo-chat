@@ -57,11 +57,19 @@ export class BoardsController {
     this.boardsService.deleteBoard(id, user);
   }
 
-  @Patch('/:id')
+  @Patch('/:id/status')
   updateBoardStatus(
     @Param('id') id: number,
     @Body('status', BoardStatusValidationPipe) status: BoardStatus,
   ) {
     this.boardsService.updateBoardStatus(id, status);
+  }
+
+  @Patch('/:id/complete')
+  updateBoardComplete(
+    @Param('id') id: number,
+    @Body('completed') completed: boolean,
+  ) {
+    this.boardsService.updateBoardComplete(id, completed);
   }
 }

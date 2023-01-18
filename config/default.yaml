@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+db:
+  type: 'mysql'
+  port: 3306
+  database: 'todos'
+  username: 'root'
+  password: '1234'
+
+jwt:
+  expriesIn: 3600
+  secret: '1234'
