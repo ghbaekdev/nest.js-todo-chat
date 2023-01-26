@@ -32,8 +32,11 @@ export class BoardsController {
 
   @Get('/')
   getAllBoard(@Query() date: any, @GetUser() user: User) {
-    console.log(date);
-    return this.boardsService.getAllBoard(user, date);
+    if (!(date['start-date'] | date['page'])) {
+      return this.boardsService.getAllBoard(user);
+    } else {
+      return this.boardsService.getFilterBoard(user, date);
+    }
   }
   @Get('/:id')
   getBoardById(@Param('id') id: number): Promise<Board> {
@@ -71,5 +74,9 @@ export class BoardsController {
     @Body('completed') completed: boolean,
   ) {
     this.boardsService.updateBoardComplete(id, completed);
+  }
+  @Post('/:id/like')
+  updateLikeCount(@Param('id') id: number, @GetUser() user: User): void {
+    this.boardsService.updateLikeCount(id, user);
   }
 }

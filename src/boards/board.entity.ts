@@ -4,10 +4,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BoardStatus } from './board-status.enum';
+import { Like } from './like.entity';
 
 @Entity()
 export class Board extends BaseEntity {
@@ -24,12 +26,17 @@ export class Board extends BaseEntity {
   status: BoardStatus;
 
   @CreateDateColumn({ type: 'timestamp' })
-  createdAt: any;
+  createdAt: Date;
 
   @Column({ default: false })
   completed: boolean;
 
+  @Column({ default: 0 })
+  likeCnt: number;
   //보드가져올때 유저 가져올필요 없으니 eager false
   @ManyToOne((type) => User, (user) => user.boards, { eager: false })
   user: User;
+
+  @ManyToMany(() => Like, (like) => like.boardId)
+  like: Like;
 }

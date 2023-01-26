@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
 import { BoardStatus } from './board-status.enum';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
+import { LikeRepository } from './like.repository';
 import { Board } from './board.entity';
 import { User } from 'src/auth/user.entity';
 import { Between } from 'typeorm';
@@ -12,15 +13,37 @@ export class BoardsService {
   constructor(
     @InjectRepository(BoardRepository)
     private boardRepository: BoardRepository,
+    @InjectRepository(LikeRepository)
+    private likeRepository: LikeRepository,
   ) {}
 
-  async getAllBoard(user: User, data: any): Promise<Board[]> {
-    //query는 board에 접근
-    // const query = this.boardRepository.createQueryBuilder('board');
-    // query.where('board.userId= :userId', { userId: user.id });
-    // const boards = await query.getMany();
-    // return boards;
+  async updateLikeCount(id: number, user: User) {
+    const qb = await this.boardRepository.createQueryBuilder();
+    const found = await this.likeRepository.findOneBy({
+      boardId: id,
+      userId: user.id,
+    });
+    if (found) {
+      return await this.likeRepository.delete({
+        userId: found.userId,
+        boardId: found.boardId,
+      });
+    } else {
+      await this.likeRepository.createLike(id, user);
+      const result = await this.likeRepository
+        .createQueryBuilder()
+        .select('COUNT(userId)', 'count')
+        .where('boardId= :id', { id: id })
+        .getRawOne();
+      await qb
+        .update(Board)
+        .set({ likeCnt: () => result.count })
+        .where('id = :id', { id: id })
+        .execute();
+    }
+  }
 
+  async getFilterBoard(user: User, data: any): Promise<Board[]> {
     const result = await this.boardRepository.find({
       select: {
         user: {
@@ -46,14 +69,14 @@ export class BoardsService {
     return result;
   }
 
-  // async getDate() {
-  //   const result = await this.boardRepository.find({
-  //     where: {
-  //       createdAt: Between(new Date('2023-01-17 07:05:00'), new Date()),
-  //     },
-  //   });
-  //   return result;
-  // }
+  async getAllBoard(user: User): Promise<Board[]> {
+    const result = await this.boardRepository.find({
+      where: {
+        user: { id: user.id },
+      },
+    });
+    return result;
+  }
 
   async getBoardById(id: number): Promise<Board> {
     const found = await this.boardRepository.findOneBy({ id });
@@ -63,20 +86,6 @@ export class BoardsService {
     }
     return found;
   }
-  // getBoardById(id: string): Board {
-  //   const found = this.boards.find((board) => board.id === id);
-  //   if (!found) {
-  //     throw new NotFoundException('아이디 틀렸어');
-  //   }
-  //   return found;
-  // }
-  // getAllBoards(): Board[] {
-  //   return this.boards;
-  // }
-
-  // async getBoardList(): Promise<Board[]> {
-  //   return await this.boardRepository
-  // }
 
   async createBoard(
     createBoardDto: CreateBoardDto,
@@ -85,18 +94,6 @@ export class BoardsService {
     return this.boardRepository.createBoard(createBoardDto, user);
   }
 
-  // createBoard(createBoardDto: CreateBoardDto) {
-  //   const { title, description } = createBoardDto;
-  //   const board: Board = {
-  //     id: uuid(),
-  //     title,
-  //     description,
-  //     status: BoardStatus.PUBLIC,
-  //   };
-  //   this.boards.push(board);
-  //   return board;
-  // }
-
   async deleteBoard(id: number, user: User): Promise<void> {
     const result = await this.boardRepository.delete({ id, user });
 
@@ -104,10 +101,7 @@ export class BoardsService {
       throw new NotFoundException(`이 아이디는 찾을수 없음.${id}`);
     }
   }
-  // deleteBoard(id: string): void {
-  //   const found = this.getBoardById(id);
-  //   this.boards = this.boards.filter((board) => board.id !== found.id);
-  // }
+
   async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
     const board = await this.getBoardById(id);
     board.status = status;
@@ -120,9 +114,4 @@ export class BoardsService {
     board.completed = completed;
     return board;
   }
-  // updateBoardStatus(id: string, status: BoardStatus): Board {
-  //   const board = this.getBoardById(id);
-  //   board.status = status;
-  //   return board;
-  // }
 }

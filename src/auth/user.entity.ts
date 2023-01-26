@@ -1,8 +1,10 @@
 import { Board } from 'src/boards/board.entity';
+import { Like } from 'src/boards/like.entity';
 import {
   BaseEntity,
   Column,
   Entity,
+  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
   Unique,
@@ -22,4 +24,7 @@ export class User extends BaseEntity {
   // eager 유저를 가져올때 보드도 가져옴.
   @OneToMany((type) => Board, (board) => board.user, { eager: false })
   boards: Board[];
+
+  @ManyToMany((type) => Like, { eager: false })
+  like: Like;
 }
