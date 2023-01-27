@@ -1,7 +1,7 @@
 import { User } from 'src/auth/user.entity';
 import { CustomRepository } from 'src/configs/typeorm.decorator';
 import { Repository } from 'typeorm';
-import { BoardStatus } from './board-status.enum';
+import { BoardStatus } from './status.enum';
 import { Board } from './board.entity';
 import { CreateBoardDto } from './dto/create-board.dto';
 

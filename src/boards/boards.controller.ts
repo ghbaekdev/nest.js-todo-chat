@@ -8,18 +8,21 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { GetUser } from 'src/auth/get-user.dacorator';
 import { User } from 'src/auth/user.entity';
-import { BoardStatus } from './board-status.enum';
+import { BoardStatus } from './status.enum';
 import { Board } from './board.entity';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { BoardStatusValidationPipe } from './pipes/board-status-validation.pipe';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('boards')
 @UseGuards(AuthGuard())
@@ -78,5 +81,15 @@ export class BoardsController {
   @Post('/:id/like')
   updateLikeCount(@Param('id') id: number, @GetUser() user: User): void {
     this.boardsService.updateLikeCount(id, user);
+  }
+
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('images'))
+  uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @GetUser() user: User,
+    @Body() body,
+  ) {
+    console.log(file, user, body);
   }
 }

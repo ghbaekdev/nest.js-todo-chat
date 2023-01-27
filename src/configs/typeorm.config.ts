@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as config from 'config';
+import { BoardSubscriber } from 'src/boards/BoardSubscriber';
 
 const dbConfig = config.get('db');
 
@@ -11,6 +12,7 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   password: process.env.RDS_PASSWORD || dbConfig.password,
   database: 'todos',
   entities: [__dirname + '../../**/*.entity.{js,ts}'],
+  subscribers: [BoardSubscriber],
   synchronize: true,
-  timezone: 'Asia/Seoul',
+  timezone: '+09:00',
 };

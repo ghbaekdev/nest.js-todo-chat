@@ -1,5 +1,5 @@
-import { ConsoleLogger, Injectable, NotFoundException } from '@nestjs/common';
-import { BoardStatus } from './board-status.enum';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { BoardStatus } from './status.enum';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardRepository } from './board.repository';
@@ -17,29 +17,34 @@ export class BoardsService {
     private likeRepository: LikeRepository,
   ) {}
 
-  async updateLikeCount(id: number, user: User) {
+  async handleUpdate(id: number) {
     const qb = await this.boardRepository.createQueryBuilder();
+    const result = await this.likeRepository
+      .createQueryBuilder()
+      .select('COUNT(userId)', 'count')
+      .where('boardId= :id', { id: id })
+      .getRawOne();
+    await qb
+      .update(Board)
+      .set({ likeCnt: () => result.count })
+      .where('id = :id', { id: id })
+      .execute();
+  }
+
+  async updateLikeCount(id: number, user: User) {
     const found = await this.likeRepository.findOneBy({
       boardId: id,
       userId: user.id,
     });
     if (found) {
-      return await this.likeRepository.delete({
+      await this.likeRepository.delete({
         userId: found.userId,
         boardId: found.boardId,
       });
+      this.handleUpdate(id);
     } else {
       await this.likeRepository.createLike(id, user);
-      const result = await this.likeRepository
-        .createQueryBuilder()
-        .select('COUNT(userId)', 'count')
-        .where('boardId= :id', { id: id })
-        .getRawOne();
-      await qb
-        .update(Board)
-        .set({ likeCnt: () => result.count })
-        .where('id = :id', { id: id })
-        .execute();
+      this.handleUpdate(id);
     }
   }
 
