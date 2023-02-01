@@ -13,7 +13,7 @@ import { PassportModule } from '@nestjs/passport';
     JwtModule.register({
       secret: '1234',
       signOptions: {
-        expiresIn: 60 * 60,
+        expiresIn: 60 * 60 * 60,
       },
     }),
     // jwt모듈 설정 secret키 및 유효기간 지정

@@ -34,12 +34,14 @@ export class BoardsController {
   constructor(private boardsService: BoardsService) {}
 
   @Get('/')
-  getAllBoard(@Query() date: any, @GetUser() user: User) {
-    if (!(date['start-date'] | date['page'])) {
-      return this.boardsService.getAllBoard(user);
-    } else {
-      return this.boardsService.getFilterBoard(user, date);
-    }
+  getAllBoard() {
+    // @Query() date: any, @GetUser() user: User
+    return this.boardsService.getAllBoard();
+    // if (!(date['start-date'] | date['page'])) {
+    //   return this.boardsService.getAllBoard();
+    // } else {
+    //   return this.boardsService.getFilterBoard(user, date);
+    // }
   }
   @Get('/:id')
   getBoardById(@Param('id') id: number): Promise<Board> {
@@ -58,9 +60,9 @@ export class BoardsController {
   @Delete('/:id')
   deleteBoard(
     @Param('id', ParseIntPipe) id: number,
-    @GetUser() user: User,
+    // @GetUser() user: User,
   ): void {
-    this.boardsService.deleteBoard(id, user);
+    this.boardsService.deleteBoard(id);
   }
 
   @Patch('/:id/status')

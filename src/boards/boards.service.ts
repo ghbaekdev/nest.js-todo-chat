@@ -41,10 +41,10 @@ export class BoardsService {
         userId: found.userId,
         boardId: found.boardId,
       });
-      this.handleUpdate(id);
+      await this.handleUpdate(id);
     } else {
       await this.likeRepository.createLike(id, user);
-      this.handleUpdate(id);
+      await this.handleUpdate(id);
     }
   }
 
@@ -74,12 +74,14 @@ export class BoardsService {
     return result;
   }
 
-  async getAllBoard(user: User): Promise<Board[]> {
-    const result = await this.boardRepository.find({
-      where: {
-        user: { id: user.id },
-      },
-    });
+  async getAllBoard(): Promise<Board[]> {
+    const result = await this.boardRepository.find();
+    //   {
+    //   where: {
+    //     user: { id: user.id },
+    //   },
+    // }
+
     return result;
   }
 
@@ -99,8 +101,11 @@ export class BoardsService {
     return this.boardRepository.createBoard(createBoardDto, user);
   }
 
-  async deleteBoard(id: number, user: User): Promise<void> {
-    const result = await this.boardRepository.delete({ id, user });
+  async deleteBoard(
+    id: number,
+    // , user: User
+  ): Promise<void> {
+    const result = await this.boardRepository.delete({ id });
 
     if (result.affected === 0) {
       throw new NotFoundException(`이 아이디는 찾을수 없음.${id}`);
