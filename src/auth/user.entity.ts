@@ -1,5 +1,5 @@
 import { Board } from 'src/boards/board.entity';
-import { History } from 'src/boards/history.entity';
+// import { History } from 'src/boards/history.entity';
 import { Like } from 'src/boards/like.entity';
 import {
   BaseEntity,
@@ -29,6 +29,6 @@ export class User extends BaseEntity {
   @ManyToMany((type) => Like, { eager: false })
   like: Like;
 
-  @ManyToMany(() => History)
-  history: History;
+  // @ManyToMany(() => History)
+  // history: History;
 }

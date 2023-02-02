@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { BoardStatus } from './status.enum';
-import { History } from './history.entity';
+// import { History } from './history.entity';
 import { Like } from './like.entity';
 
 @Entity()
@@ -41,6 +41,6 @@ export class Board extends BaseEntity {
   @ManyToMany(() => Like, (like) => like.boardId)
   like: Like;
 
-  @ManyToMany(() => History)
-  history: History;
+  // @ManyToMany(() => History)
+  // history: History;
 }

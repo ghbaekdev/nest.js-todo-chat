@@ -5,23 +5,18 @@ import { BoardRepository } from './board.repository';
 import { TypeOrmExModule } from 'src/configs/typeorm.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { LikeRepository } from './like.repository';
-import { BoardSubscriber } from './BoardSubscriber';
-import { HistoryRepository } from './history.repository';
+
 import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
-    TypeOrmExModule.forCustomRepository([
-      BoardRepository,
-      LikeRepository,
-      HistoryRepository,
-    ]),
+    TypeOrmExModule.forCustomRepository([BoardRepository, LikeRepository]),
     AuthModule,
     MulterModule.register({
       dest: './upload',
     }),
   ],
-  providers: [BoardsService, BoardSubscriber],
+  providers: [BoardsService],
   controllers: [BoardsController],
 })
 export class BoardsModule {}
