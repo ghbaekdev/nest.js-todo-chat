@@ -19,6 +19,7 @@ interface MessagePayload {
 let createdRooms: string[] = [];
 
 @WebSocketGateway({
+  // transports: ['websocket'],
   namespace: 'chat',
   cors: {
     origin: ['http://localhost:3000'],
